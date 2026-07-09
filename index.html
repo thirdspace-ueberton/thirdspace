@@ -111,6 +111,37 @@
     .nav-links a.active { color: var(--accent); font-weight: 700; }
     .nav-links a.active::after { width: 100%; }
 
+    /* ── HAMBURGER TOGGLE (nur mobil sichtbar) ── */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 102;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transition: transform 0.25s ease, opacity 0.2s ease;
+    }
+
+    .nav-toggle[aria-expanded="true"] span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
     /* ── SECTIONS ── */
     section {
       min-height: 100vh;
@@ -380,9 +411,42 @@
       transition: width 0.1s linear;
     }
 
-    @media (max-width: 600px) {
-      .nav-links { gap: 1rem; }
-      .nav-links a { font-size: 0.72rem; }
+    @media (max-width: 700px) {
+      nav { padding: 0 1.2rem; }
+
+      .nav-toggle { display: flex; }
+
+      .nav-links {
+        position: fixed;
+        top: var(--nav-h);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        background: #ffffff;
+        border-bottom: 2px solid var(--accent);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .nav-links.open { max-height: 320px; }
+
+      .nav-links li { width: 100%; }
+
+      .nav-links a {
+        display: block;
+        padding: 1rem 1.2rem;
+        font-size: 0.9rem;
+        border-bottom: 1px dashed var(--border);
+      }
+
+      .nav-links a::after { display: none; }
+      .nav-links a.active { background: var(--surface); }
+
+      .nav-logo span { font-size: 1.1rem; }
+      .nav-logo img { height: 26px; }
+
       .card-grid { grid-template-columns: 1fr; }
       .card { border-right: none; border-bottom: 1px solid var(--border); }
     }
@@ -398,12 +462,17 @@
     <img src="Logo ueberton .jpg">
     <span></span>
   </div>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#raum">über den Raum</a></li>
     <li><a href="#mitglieder">über die Mitglieder</a></li>
     <li><a href="#veranstaltungen">Veranstaltungen</a></li>
     <li><a href="#newsletter:kontakt">Newsletter:Kontakt</a></li>
   </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </nav>
 
 <!-- Raum -->
@@ -418,7 +487,6 @@
   <div class="eyebrow">ueber die mitglieder</div>
   <div class="divider"></div>
   <p>Hier finden Sie alle Links zu unseren Mitgliedern:</p>
-  </p>
   <p>Falz</p>
   <a href="https://soundcloud.com/signal-weltfunk" target="_blank">&gt;&gt;Soundcloud - Signal Weltfunk&lt;&lt;</a>
   <a href="https://www.instagram.com/signalweltfunk/?hl=en/" target="_blank">&gt;&gt;www.instagram.com/signalweltfunk&lt;&lt;</a>
@@ -496,6 +564,24 @@
 <script>
   const sections = document.querySelectorAll('section');
   const navLinks = document.querySelectorAll('.nav-links a');
+
+  // ── MOBILE MENU ──
+  const navToggle = document.getElementById('navToggle');
+  const navLinksList = document.getElementById('navLinks');
+
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinksList.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    navToggle.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
+  });
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      navLinksList.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.setAttribute('aria-label', 'Menü öffnen');
+    });
+  });
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
